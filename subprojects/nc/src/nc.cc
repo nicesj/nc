@@ -8,10 +8,10 @@ static void nc_fini(void) __attribute__((destructor));
 
 void nc_init(void)
 {
-    InfoPrint("Hello World");
+    DbgPrint("NC library is initialized");
 }
 
 void nc_fini(void)
 {
-    InfoPrint("Good bye World");
+    DbgPrint("NC library is finalized");
 }
