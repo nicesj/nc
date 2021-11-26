@@ -1,0 +1,153 @@
+/*
+ * Copyright 2021 nicesj
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef __NC_LOG__
+#define __NC_LOG__
+
+#include <cstdio>
+#include <cassert>
+#include <sys/time.h>
+
+#if defined(SYS_gettid)
+#if defined(__APPLE__)
+#include <sys/types.h>
+#define GETTID() ((unsigned long)getpid())
+#else
+#define GETTID() syscall(SYS_gettid)
+#endif // __APPLE__
+#else // SYS_gettid
+#define GETTID() 0lu
+#endif // SYS_gettid
+
+#define NC_ERRMSG_LEN 80
+
+#if !defined(PLATFORM_LOGD)
+#define PLATFORM_LOGD(fmt, ...) fprintf(stdout, fmt "\n", ##__VA_ARGS__)
+#endif
+#if !defined(PLATFORM_LOGI)
+#define PLATFORM_LOGI(fmt, ...) fprintf(stdout, fmt "\n", ##__VA_ARGS__)
+#endif
+#if !defined(PLATFORM_LOGE)
+#define PLATFORM_LOGE(fmt, ...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)
+#endif
+
+#if (_POSIX_C_SOURCE >= 200112L) && !defined(_GNU_SOURCE) || defined(__APPLE__)
+#define NC_STRERROR_R(errno, buf, buflen)                      \
+    do {                                                       \
+        int ret = strerror_r(errno, buf, buflen);              \
+        if (ret) {                                             \
+            assert(ret == 0 && "strerror_r failed");           \
+        }                                                      \
+    } while (0)
+#else
+#define NC_STRERROR_R(errno, buf, buflen)                      \
+    do {                                                       \
+        const char *errstr = strerror_r(errno, buf, buflen);   \
+        if (!errstr) {                                         \
+            assert(errstr != nullptr && "strerror_r failed");  \
+        }                                                      \
+    } while (0)
+#endif
+
+#if defined(_LOG_WITH_TIMESTAMP)
+#if defined(NDEBUG)
+#define DbgPrint(fmt, ...)
+#else
+#define DbgPrint(fmt, ...)                                                            \
+    do {                                                                              \
+        struct timeval tv;                                                            \
+        struct timeval res;                                                           \
+        if (gettimeofday(&tv, NULL) < 0) {                                            \
+            assert(!"gettimeofday failed");                                           \
+        }                                                                             \
+        timersub(&tv, &__nc_last_timestamp, &res);                                    \
+        PLATFORM_LOGD("[%lu] %lu.%.6lu(%lu.%.6lu) " fmt, GETTID(), tv.tv_sec, tv.tv_usec, \
+                      res.tv_sec, res.tv_usec, ##__VA_ARGS__);                        \
+        __nc_last_timestamp.tv_sec = tv.tv_sec;                                       \
+        __nc_last_timestamp.tv_usec = tv.tv_usec;                                     \
+    } while (0)
+#endif
+
+#define InfoPrint(fmt, ...)                                                           \
+    do {                                                                              \
+        struct timeval tv;                                                            \
+        struct timeval res;                                                           \
+        if (gettimeofday(&tv, NULL) < 0) {                                            \
+            assert(!"gettimeofday failed");                                           \
+        }                                                                             \
+        timersub(&tv, &__nc_last_timestamp, &res);                                    \
+        PLATFORM_LOGI("[%lu] %lu.%.6lu(%lu.%.6lu) " fmt, GETTID(), tv.tv_sec, tv.tv_usec, \
+                      res.tv_sec, res.tv_usec, ##__VA_ARGS__);                        \
+        __nc_last_timestamp.tv_sec = tv.tv_sec;                                       \
+        __nc_last_timestamp.tv_usec = tv.tv_usec;                                     \
+    } while (0)
+
+#define ErrPrint(fmt, ...)                                                                              \
+    do {                                                                                                \
+        struct timeval tv;                                                                              \
+        struct timeval res;                                                                             \
+        if (gettimeofday(&tv, NULL) < 0) {                                                              \
+            assert(!"gettimeofday failed");                                                             \
+        }                                                                                               \
+        timersub(&tv, &__nc_last_timestamp, &res);                                                      \
+        PLATFORM_LOGE("[%lu] %lu.%.6lu(%lu.%.6lu) \033[31m" fmt "\033[0m", GETTID(), tv.tv_sec, tv.tv_usec, \
+                      res.tv_sec, res.tv_usec, ##__VA_ARGS__);                                          \
+        __nc_last_timestamp.tv_sec = tv.tv_sec;                                                         \
+        __nc_last_timestamp.tv_usec = tv.tv_usec;                                                       \
+    } while (0)
+
+#define ErrPrintCode(_nc_errno, fmt, ...)                                                                       \
+    do {                                                                                                        \
+        struct timeval tv;                                                                                      \
+        struct timeval res;                                                                                     \
+        char errMsg[NC_ERRMSG_LEN] = { '\0' };                                                                  \
+        int _errno = (_nc_errno);                                                                               \
+                                                                                                                \
+        NC_STRERROR_R(_errno, errMsg, sizeof(errMsg));                                                          \
+                                                                                                                \
+        if (gettimeofday(&tv, NULL) < 0) {                                                                      \
+            assert(!"gettimeofday failed");                                                                     \
+        }                                                                                                       \
+        timersub(&tv, &__nc_last_timestamp, &res);                                                              \
+        PLATFORM_LOGE("[%lu] %lu.%.6lu(%lu.%.6lu) (%d:%s) \033[31m" fmt "\033[0m", GETTID(), tv.tv_sec, tv.tv_usec, \
+                      res.tv_sec, res.tv_usec, _errno, errMsg, ##__VA_ARGS__);                                  \
+        __nc_last_timestamp.tv_sec = tv.tv_sec;                                                                 \
+        __nc_last_timestamp.tv_usec = tv.tv_usec;                                                               \
+    } while (0)
+
+#else // _LOG_WITH_TIMESTAMP
+#if defined(NDEBUG)
+#define DbgPrint(fmt, ...)
+#else
+#define DbgPrint(fmt, ...) PLATFORM_LOGD("[%lu] " fmt, GETTID(), ##__VA_ARGS__)
+#endif
+
+#define InfoPrint(fmt, ...) PLATFORM_LOGI("[%lu] " fmt, GETTID(), ##__VA_ARGS__)
+#define ErrPrint(fmt, ...) PLATFORM_LOGE("[%lu] \033[31m" fmt "\033[0m", GETTID(), ##__VA_ARGS__)
+#define ErrPrintCode(_nc_errno, fmt, ...)                                                           \
+    do {                                                                                            \
+        char errMsg[NC_ERRMSG_LEN] = { '\0' };                                                      \
+        int _errno = (_nc_errno);                                                                   \
+        NC_STRERROR_R(_errno, errMsg, sizeof(errMsg));                                              \
+        PLATFORM_LOGE("[%lu] (%d:%s) \033[31m" fmt "\033[0m", GETTID(), _errno, errMsg, ##__VA_ARGS__); \
+    } while (0)
+
+#endif // _LOG_WITH_TIMESTAMP
+
+#endif // __NC__
+
+/* http://vimdoc.sourceforge.net/htmldoc/options.html#modeline */
+/* vim: set ft=cpp fdm=syntax : */
