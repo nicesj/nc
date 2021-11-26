@@ -68,8 +68,8 @@
 #else
 #define DbgPrint(fmt, ...)                                                            \
     do {                                                                              \
-        struct timeval tv;                                                            \
-        struct timeval res;                                                           \
+        timeval tv;                                                            \
+        timeval res;                                                           \
         if (gettimeofday(&tv, NULL) < 0) {                                            \
             assert(!"gettimeofday failed");                                           \
         }                                                                             \
@@ -83,8 +83,8 @@
 
 #define InfoPrint(fmt, ...)                                                           \
     do {                                                                              \
-        struct timeval tv;                                                            \
-        struct timeval res;                                                           \
+        timeval tv;                                                            \
+        timeval res;                                                           \
         if (gettimeofday(&tv, NULL) < 0) {                                            \
             assert(!"gettimeofday failed");                                           \
         }                                                                             \
@@ -97,8 +97,8 @@
 
 #define ErrPrint(fmt, ...)                                                                              \
     do {                                                                                                \
-        struct timeval tv;                                                                              \
-        struct timeval res;                                                                             \
+        timeval tv;                                                                              \
+        timeval res;                                                                             \
         if (gettimeofday(&tv, NULL) < 0) {                                                              \
             assert(!"gettimeofday failed");                                                             \
         }                                                                                               \
@@ -111,8 +111,8 @@
 
 #define ErrPrintCode(_nc_errno, fmt, ...)                                                                       \
     do {                                                                                                        \
-        struct timeval tv;                                                                                      \
-        struct timeval res;                                                                                     \
+        timeval tv;                                                                                      \
+        timeval res;                                                                                     \
         char errMsg[NC_ERRMSG_LEN] = { '\0' };                                                                  \
         int _errno = (_nc_errno);                                                                               \
                                                                                                                 \
