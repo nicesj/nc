@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=@CMAKE_INSTALL_LIBDIR@
+includedir=@CMAKE_INSTALL_INCLUDEDIR@
+
+Name: @PROJECT_NAME@
+Description: Development files
+Version: @PROJECT_VERSION@
+Requires:
+Libs: -L${libdir} -l@PROJECT_NAME@
+Cflags: -I${includedir}
