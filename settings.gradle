@@ -1,0 +1,9 @@
+rootProject.name = "nc"
+
+include("nc")
+
+for (project in rootProject.children) {
+    if (project.name == "nc") {
+        project.projectDir = file("subprojects/${project.name}")
+    }
+}

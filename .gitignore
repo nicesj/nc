@@ -14,3 +14,7 @@ debian/nc
 debian/nc.substvars
 debian/files
 debian/.debhelper
+.gradle/
+.idea/
+local.properties
+.cxx/

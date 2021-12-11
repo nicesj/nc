@@ -1,0 +1,83 @@
+apply plugin: 'com.android.library'
+
+def getGitHash = {
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'rev-parse', '--short', 'HEAD'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.2"
+
+    sourceSets {
+        main {
+            manifest.srcFile 'androidManifest.xml'
+        }
+    }
+
+    defaultConfig {
+        minSdkVersion 28
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        externalNativeBuild {
+            cmake {
+                arguments '-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON'
+                arguments '-DCMAKE_INSTALL_PREFIX:PATH=/usr'
+                arguments '-DANDROID_STL=c++_shared'
+                arguments "-DREVISION=${getGitHash()}"
+                arguments '-DPLATFORM=android'
+                abiFilters 'arm64-v8a', 'x86'
+                targets "nc"
+            }
+        }
+    }
+
+    buildTypes {
+    }
+
+    packagingOptions {
+        // NOTE:
+        // This AAR does not aim to provide the following native libraries
+        // The following native libraries would be included by an AAR which is going to have depdendency of this
+        exclude 'lib/*/libc++_shared.so'
+        exclude 'lib/*/libnc.so*'
+    }
+
+    buildFeatures {
+        prefabPublishing true
+    }
+
+    prefab {
+        nc {
+            headers "build/target/include"
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "./CMakeLists.txt"
+            version "3.18.1"
+        }
+    }
+}
+
+dependencies {
+}
+
+task prefabNCHeaders(type: Copy) {
+    from "include/nc"
+    into "build/target/include/nc"
+}
+
+task prefabAndroidHeaders(type: Copy, dependsOn: prefabNCHeaders) {
+    from "include/android"
+    into "build/target/include/nc/platform"
+}
+
+preBuild.dependsOn(prefabAndroidHeaders)
