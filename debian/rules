@@ -1,5 +1,41 @@
 #!/usr/bin/make -f
 #export DH_VERBOSE = 1
 
-%:
-        dh $@
+build-arch:
+	@echo "build-arch"
+	@mkdir build; \
+	cd build; \
+	cmake .. -DCMAKE_INSTALL_PREFIX=/usr; \
+	make; \
+	cd ..
+
+build-indep:
+	@echo "build-indep"
+
+build: build-arch build-indep
+	@echo "build"
+
+binary-arch:
+	@echo "binary-arch"
+
+binary-indep:
+	@echo "binary-indep"
+	@cd build; \
+	make DESTDIR=../debian/nc install; \
+	cd ..
+	dh_makeshlibs
+	dh_gencontrol
+	dh_builddeb
+
+binary: binary-arch binary-indep
+	@echo "binary"
+
+install:
+	@echo "install"
+
+clean:
+	@echo "clean"
+	@rm -rf build
+	@rm -rf debian/nc
+
+.PHONY: build binary install clean

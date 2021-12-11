@@ -10,3 +10,7 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 build
+debian/nc
+debian/nc.substvars
+debian/files
+debian/.debhelper

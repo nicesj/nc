@@ -2,12 +2,12 @@ Source: nc
 Section: libs
 Priority: standard
 Maintainer: Sungjae Park <nicesj@nicesj.com>
-Build-Depends: cmake
+Build-Depends: debhelper, cmake
 Standards-Version: 0.0.1
 Homepage: https://futuremobile.net/opensource/project/nc
 Vcs-Git: https://github.com/nicesj/nc -b main 
 
 Package: nc
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: The simple and short core library
