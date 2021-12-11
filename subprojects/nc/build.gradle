@@ -77,7 +77,7 @@ task prefabNCHeaders(type: Copy) {
 
 task prefabAndroidHeaders(type: Copy, dependsOn: prefabNCHeaders) {
     from "include/android"
-    into "build/target/include/nc/platform"
+    into "build/target/include/nc"
 }
 
 preBuild.dependsOn(prefabAndroidHeaders)

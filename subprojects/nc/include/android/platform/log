@@ -1,0 +1,25 @@
+#ifndef __NC_PLATFORM_H__
+#define __NC_PLATFORM_H__
+
+#include <cstdio>
+#include <libgen.h>
+
+#include <jni.h>
+#include <android/log.h>
+
+#define PLATFORM_LOGD(fmt, ...)                     \
+    __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, \
+                        "[%s:%s:%d] " fmt, basename((char *)(__FILE__)), __func__, __LINE__, ##__VA_ARGS__)
+
+#define PLATFORM_LOGI(fmt, ...)                    \
+    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, \
+                        "[%s:%s:%d] " fmt, basename((char *)(__FILE__)), __func__, __LINE__, ##__VA_ARGS__)
+
+#define PLATFORM_LOGE(fmt, ...)                     \
+    __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, \
+                        "[%s:%s:%d] " fmt, basename((char *)(__FILE__)), __func__, __LINE__, ##__VA_ARGS__)
+
+#endif // __NC_PLATFORM_H__
+
+/* http://vimdoc.sourceforge.net/htmldoc/options.html#modeline */
+/* vim: set ft=cpp fdm=syntax : */

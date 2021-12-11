@@ -19,6 +19,9 @@
 
 #include <cstdio>
 #include <cassert>
+
+#include <platform/log>
+
 #include <sys/time.h>
 
 #if defined(SYS_gettid)
