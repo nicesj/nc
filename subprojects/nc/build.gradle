@@ -27,11 +27,11 @@ android {
 
         externalNativeBuild {
             cmake {
-                arguments '-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON'
+                arguments '-DCMAKE_VERBOSE_MAKEFILE:BOOL=TRUE'
                 arguments '-DCMAKE_INSTALL_PREFIX:PATH=/usr'
                 arguments '-DANDROID_STL=c++_shared'
                 arguments "-DREVISION=${getGitHash()}"
-                arguments '-DPLATFORM=android'
+                arguments '-DANDROID:BOOL=TRUE'
                 abiFilters 'arm64-v8a', 'x86'
                 targets "nc"
             }
